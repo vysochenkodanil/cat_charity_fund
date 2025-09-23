@@ -28,7 +28,7 @@
 from fastapi import FastAPI
 from fastapi_users import FastAPIUsers
 
-from app.api.routers import main_router
+from app.api.routers import api_router 
 from app.core.config import settings
 from app.core.user import auth_backend, get_user_manager, current_user, current_superuser
 from app.models.user import User
@@ -60,7 +60,7 @@ app.include_router(
 )
 
 # Подключение основных роутеров приложения
-app.include_router(main_router)
+app.include_router(api_router )
 
 @app.get("/")
 async def root():

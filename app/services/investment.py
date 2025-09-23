@@ -23,7 +23,10 @@ def _invest(obj_from, obj_to):
     return amount
 
 
-async def investment_process(session: AsyncSession):
+async def investment_process(
+    new_project: CharityProject,
+    session: AsyncSession
+) -> CharityProject:
     """
     Универсальная функция для распределения средств между проектами и донатами.
     Вызывается после создания нового проекта или пожертвования.

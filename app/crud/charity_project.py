@@ -2,6 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy import update, delete
 
+from fastapi import HTTPException
 from app.models.charity_project import CharityProject
 from app.schemas.charity_project import CharityProjectCreate, CharityProjectUpdate
 
@@ -31,20 +32,21 @@ class CharityProjectCRUD:
         await session.commit()
         await session.refresh(new_project)
         return new_project
+    
 
     async def update(
         self,
         db_obj: CharityProject,
         obj_in: CharityProjectUpdate,
-        session: AsyncSession,
+        session: AsyncSession
     ) -> CharityProject:
-        obj_data = obj_in.dict(exclude_unset=True)
-        for field, value in obj_data.items():
-            setattr(db_obj, field, value)
-        session.add(db_obj)
-        await session.commit()
-        await session.refresh(db_obj)
-        return db_obj
+        if obj_in.full_amount and obj_in.full_amount < db_obj.invested_amount:
+            raise HTTPException(
+                status_code=400,
+                detail="Нельзя уменьшить требуемую сумму меньше уже вложенной."
+            )
+        return await super().update(db_obj, obj_in, session)
+
 
     async def remove(self, db_obj: CharityProject, session: AsyncSession):
         await session.delete(db_obj)
