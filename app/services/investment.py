@@ -14,25 +14,23 @@ async def invest_funds(session: AsyncSession):
         # Получаем все открытые проекты и донаты
         projects = await session.execute(
             select(CharityProject)
-            .where(CharityProject.fully_invested is False)
+            .where(~CharityProject.fully_invested)
             .order_by(CharityProject.create_date)
         )
         projects = projects.scalars().all()
 
         donations = await session.execute(
             select(Donation)
-            .where(Donation.fully_invested is False)
+            .where(~Donation.fully_invested)
             .order_by(Donation.create_date)
         )
         donations = donations.scalars().all()
 
         for donation in donations:
-            if donation.fully_invested:
-                continue
+            remaining_donation = donation.full_amount - donation.invested_amount
 
-            remaining_donation = (
-                donation.full_amount - donation.invested_amount
-            )
+            if remaining_donation <= 0:
+                continue
 
             for project in projects:
                 if project.fully_invested or remaining_donation <= 0:
