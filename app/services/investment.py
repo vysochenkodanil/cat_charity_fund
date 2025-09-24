@@ -27,7 +27,9 @@ async def invest_funds(session: AsyncSession):
         donations = donations.scalars().all()
 
         for donation in donations:
-            remaining_donation = donation.full_amount - donation.invested_amount
+            remaining_donation = (
+                donation.full_amount - donation.invested_amount
+            )
 
             if remaining_donation <= 0:
                 continue

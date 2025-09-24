@@ -69,8 +69,8 @@ async def update_project(
 
     # Проверка суммы
     if (
-        obj_in.full_amount is not None
-        and obj_in.full_amount < db_obj.invested_amount
+        obj_in.full_amount is not None and
+        obj_in.full_amount < db_obj.invested_amount
     ):
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -88,7 +88,9 @@ async def update_project(
                 detail="Проект с таким именем уже существует",
             )
 
-    updated_project = await charity_project_crud.update(db_obj, obj_in, session)
+    updated_project = await charity_project_crud.update(
+        db_obj, obj_in, session
+    )
     await invest_project(updated_project, session)
     await session.commit()  # Коммит здесь
     await session.refresh(updated_project)
