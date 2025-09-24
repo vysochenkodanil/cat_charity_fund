@@ -1,5 +1,6 @@
-from sqlalchemy import Column, Integer, Text, Boolean, DateTime, ForeignKey
 from datetime import datetime
+
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, Text
 
 from app.core.db import Base
 

@@ -1,13 +1,17 @@
 from datetime import datetime
-from pydantic import BaseModel, PositiveInt
 from typing import Optional
+
+from pydantic import BaseModel, PositiveInt
+
 
 class DonationBase(BaseModel):
     comment: Optional[str] = None
     full_amount: PositiveInt
 
+
 class DonationCreate(DonationBase):
     pass
+
 
 class DonationDB(DonationBase):
     id: int
@@ -19,6 +23,7 @@ class DonationDB(DonationBase):
 
     class Config:
         orm_mode = True
+
 
 # Схема для обычного пользователя (ограниченные поля)
 class DonationUserDB(BaseModel):

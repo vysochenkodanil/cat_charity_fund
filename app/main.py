@@ -1,38 +1,11 @@
-# from fastapi import FastAPI
-
-# from app.core.db import Base, get_async_session
-# from app.core.user import auth_backend, fastapi_users, current_user, current_superuser
-# from app.api.routers import api_router
-
-# app = FastAPI(title="QRKot")
-
-# # Подключение роутеров FastAPI Users
-# app.include_router(
-#     fastapi_users.get_auth_router(auth_backend),
-#     prefix="/auth/jwt",
-#     tags=["Auth"],
-# )
-# app.include_router(
-#     fastapi_users.get_register_router(),
-#     prefix="/auth",
-#     tags=["Auth"],
-# )
-# app.include_router(
-#     fastapi_users.get_users_router(),
-#     prefix="/users",
-#     tags=["Users"],
-# )
-
-# # Подключение наших роутеров
-# app.include_router(api_router)
 from fastapi import FastAPI
 from fastapi_users import FastAPIUsers
 
-from app.api.routers import api_router 
+from app.api.routers import api_router
 from app.core.config import settings
-from app.core.user import auth_backend, get_user_manager, current_user, current_superuser
+from app.core.user import auth_backend, get_user_manager
 from app.models.user import User
-from app.schemas.user import UserRead, UserCreate
+from app.schemas.user import UserCreate, UserRead
 
 app = FastAPI(title=settings.app_title)
 
@@ -60,7 +33,8 @@ app.include_router(
 )
 
 # Подключение основных роутеров приложения
-app.include_router(api_router )
+app.include_router(api_router)
+
 
 @app.get("/")
 async def root():

@@ -1,10 +1,11 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy import update, delete
 
-from fastapi import HTTPException
 from app.models.charity_project import CharityProject
-from app.schemas.charity_project import CharityProjectCreate, CharityProjectUpdate
+from app.schemas.charity_project import (
+    CharityProjectCreate,
+    CharityProjectUpdate,
+)
 
 
 class CharityProjectCRUD:
@@ -29,28 +30,29 @@ class CharityProjectCRUD:
     ) -> CharityProject:
         new_project = CharityProject(**obj_in.dict())
         session.add(new_project)
-        await session.commit()
+        await session.flush()  # Только flush, не commit
         await session.refresh(new_project)
         return new_project
-    
 
     async def update(
         self,
         db_obj: CharityProject,
         obj_in: CharityProjectUpdate,
-        session: AsyncSession
+        session: AsyncSession,
     ) -> CharityProject:
-        if obj_in.full_amount and obj_in.full_amount < db_obj.invested_amount:
-            raise HTTPException(
-                status_code=400,
-                detail="Нельзя уменьшить требуемую сумму меньше уже вложенной."
-            )
-        return await super().update(db_obj, obj_in, session)
+        obj_data = obj_in.dict(exclude_unset=True)
 
+        for field, value in obj_data.items():
+            setattr(db_obj, field, value)
+
+        session.add(db_obj)
+        await session.flush()  # Только flush, не commit
+        await session.refresh(db_obj)
+        return db_obj
 
     async def remove(self, db_obj: CharityProject, session: AsyncSession):
         await session.delete(db_obj)
-        await session.commit()
+        await session.flush()  # Только flush, не commit
         return db_obj
 
 
