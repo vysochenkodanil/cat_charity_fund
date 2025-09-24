@@ -1,19 +1,17 @@
 from logging.config import fileConfig
+
 from sqlalchemy import engine_from_config, pool
+
 from alembic import context
-
 from app.core.config import settings
-from app.core.db import Base  # импортируем Base с метаданными
-import app.models.charity_project  # чтобы подхватились модели
-import app.models.donation
-import app.models.user
-
+from app.core.db import Base
 
 config = context.config
 fileConfig(config.config_file_name)
 
-# Используем синхронный драйвер SQLite
-config.set_main_option("sqlalchemy.url", settings.database_url.replace("+aiosqlite", ""))
+config.set_main_option(
+    "sqlalchemy.url", settings.database_url.replace("+aiosqlite", "")
+)
 
 target_metadata = Base.metadata
 
@@ -41,7 +39,9 @@ def run_migrations_online():
     )
 
     with connectable.connect() as connection:
-        context.configure(connection=connection, target_metadata=target_metadata)
+        context.configure(
+            connection=connection, target_metadata=target_metadata
+        )
 
         with context.begin_transaction():
             context.run_migrations()
