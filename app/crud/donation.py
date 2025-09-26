@@ -5,41 +5,41 @@ from app.models.donation import Donation
 from app.schemas.donation import DonationCreate
 
 
-async def create_donation(
-    donation_in: DonationCreate,
-    user_id: int,
-    session: AsyncSession,
-) -> Donation:
-    donation_data = donation_in.dict()
-    donation = Donation(**donation_data, user_id=user_id)
-    session.add(donation)
-    await session.flush()  # Только flush, не commit
-    await session.refresh(donation)
-    return donation
-
-
-async def get_by_user(
-    user_id: int,
-    session: AsyncSession,
-) -> list[Donation]:
-    donations = await session.execute(
-        select(Donation).where(Donation.user_id == user_id)
-    )
-    return donations.scalars().all()
-
-
-async def get_multi(
-    session: AsyncSession,
-) -> list[Donation]:
-    donations = await session.execute(select(Donation))
-    return donations.scalars().all()
-
-
 class DonationCRUD:
-    def __init__(self):
-        self.create = create_donation
-        self.get_by_user = get_by_user
-        self.get_multi = get_multi
+    """CRUD-операции для модели Donation."""
+
+    async def create(
+        self,
+        donation_in: DonationCreate,
+        user_id: int,
+        session: AsyncSession,
+    ) -> Donation:
+        """Создать пожертвование."""
+        donation_data = donation_in.dict()
+        donation = Donation(**donation_data, user_id=user_id)
+        session.add(donation)
+        await session.flush()
+        await session.refresh(donation)
+        return donation
+
+    async def get_by_user(
+        self,
+        user_id: int,
+        session: AsyncSession,
+    ) -> list[Donation]:
+        """Получить все пожертвования конкретного пользователя."""
+        donations = await session.execute(
+            select(Donation).where(Donation.user_id == user_id)
+        )
+        return donations.scalars().all()
+
+    async def get_multi(
+        self,
+        session: AsyncSession,
+    ) -> list[Donation]:
+        """Получить все пожертвования."""
+        donations = await session.execute(select(Donation))
+        return donations.scalars().all()
 
 
 donation_crud = DonationCRUD()

@@ -2,10 +2,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from app.models.charity_project import CharityProject
-from app.schemas.charity_project import (
-    CharityProjectCreate,
-    CharityProjectUpdate,
-)
+from app.schemas.charity_project import (CharityProjectCreate,
+                                         CharityProjectUpdate)
 
 
 class CharityProjectCRUD:
@@ -30,7 +28,7 @@ class CharityProjectCRUD:
     ) -> CharityProject:
         new_project = CharityProject(**obj_in.dict())
         session.add(new_project)
-        await session.flush()  # Только flush, не commit
+        await session.flush()
         await session.refresh(new_project)
         return new_project
 
@@ -46,13 +44,13 @@ class CharityProjectCRUD:
             setattr(db_obj, field, value)
 
         session.add(db_obj)
-        await session.flush()  # Только flush, не commit
+        await session.flush()
         await session.refresh(db_obj)
         return db_obj
 
     async def remove(self, db_obj: CharityProject, session: AsyncSession):
         await session.delete(db_obj)
-        await session.flush()  # Только flush, не commit
+        await session.flush()
         return db_obj
 
 

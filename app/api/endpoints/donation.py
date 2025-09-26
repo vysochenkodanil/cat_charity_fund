@@ -21,7 +21,7 @@ async def create_donation(
     """Сделать пожертвование (для авторизованных пользователей)."""
     new_donation = await donation_crud.create(donation_in, user.id, session)
     await invest_donation(new_donation, session)
-    await session.commit()  # Коммит здесь
+    await session.commit()
     await session.refresh(new_donation)
     return new_donation
 

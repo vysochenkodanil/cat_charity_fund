@@ -1,14 +1,14 @@
+from http import HTTPStatus
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_async_session
 from app.core.user import current_superuser
 from app.crud.charity_project import charity_project_crud
-from app.schemas.charity_project import (
-    CharityProjectCreate,
-    CharityProjectDB,
-    CharityProjectUpdate,
-)
+from app.schemas.charity_project import (CharityProjectCreate,
+                                         CharityProjectDB,
+                                         CharityProjectUpdate)
 from app.services.investment import invest_project
 
 router = APIRouter()
@@ -36,7 +36,7 @@ async def create_project(
 
     new_project = await charity_project_crud.create(project_in, session)
     await invest_project(new_project, session)
-    await session.commit()  # Коммит здесь
+    await session.commit()
     await session.refresh(new_project)
     return new_project
 
@@ -60,14 +60,16 @@ async def update_project(
     """Обновить проект (только суперюзер)."""
     db_obj = await charity_project_crud.get_by_id(project_id, session)
     if not db_obj:
-        raise HTTPException(status_code=404, detail="Проект не найден")
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND, detail="Проект не найден"
+        )
 
     if db_obj.fully_invested:
         raise HTTPException(
-            status_code=400, detail="Закрытые проекты нельзя редактировать"
+            status_code=HTTPStatus.BAD_REQUEST,
+            detail="Закрытые проекты нельзя редактировать",
         )
 
-    # Проверка суммы
     if (
         obj_in.full_amount is not None and
         obj_in.full_amount < db_obj.invested_amount
@@ -77,7 +79,6 @@ async def update_project(
             detail="Нельзя установить требуемую сумму меньше уже внесенной",
         )
 
-    # Проверка имени на уникальность
     if obj_in.name is not None:
         existing_project = await charity_project_crud.get_by_name(
             obj_in.name, session
@@ -92,7 +93,7 @@ async def update_project(
         db_obj, obj_in, session
     )
     await invest_project(updated_project, session)
-    await session.commit()  # Коммит здесь
+    await session.commit()
     await session.refresh(updated_project)
     return updated_project
 
@@ -109,7 +110,9 @@ async def delete_project(
     """Удалить проект (только суперюзер, если нет инвестиций)."""
     db_obj = await charity_project_crud.get_by_id(project_id, session)
     if not db_obj:
-        raise HTTPException(status_code=404, detail="Проект не найден")
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND, detail="Проект не найден"
+        )
 
     if db_obj.invested_amount > 0:
         raise HTTPException(
@@ -118,5 +121,5 @@ async def delete_project(
         )
 
     deleted_project = await charity_project_crud.remove(db_obj, session)
-    await session.commit()  # Коммит здесь
+    await session.commit()
     return deleted_project

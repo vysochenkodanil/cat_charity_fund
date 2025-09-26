@@ -1,17 +1,10 @@
 from typing import Optional, Union
 
 from fastapi import Depends, Request
-from fastapi_users import (
-    BaseUserManager,
-    FastAPIUsers,
-    IntegerIDMixin,
-    InvalidPasswordException,
-)
-from fastapi_users.authentication import (
-    AuthenticationBackend,
-    BearerTransport,
-    JWTStrategy,
-)
+from fastapi_users import (BaseUserManager, FastAPIUsers, IntegerIDMixin,
+                           InvalidPasswordException)
+from fastapi_users.authentication import (AuthenticationBackend,
+                                          BearerTransport, JWTStrategy)
 from fastapi_users_db_sqlalchemy import SQLAlchemyUserDatabase
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -60,17 +53,14 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
         print(f"Пользователь {user.email} зарегистрирован.")
 
 
-# Корутина, возвращающая объект класса UserManager
 async def get_user_manager(user_db=Depends(get_user_db)):
     yield UserManager(user_db)
 
 
-# Создаем экземпляр FastAPIUsers с правильными типами
 fastapi_users = FastAPIUsers[User, int](
     get_user_manager,
     [auth_backend],
 )
 
-# Создаем зависимости для текущего пользователя и суперпользователя
 current_user = fastapi_users.current_user(active=True)
 current_superuser = fastapi_users.current_user(active=True, superuser=True)
