@@ -9,13 +9,13 @@ from app.schemas.user import UserCreate, UserRead
 
 app = FastAPI(title=settings.app_title)
 
-# Настройка FastAPI Users
+
 fastapi_users = FastAPIUsers[User, int](
     get_user_manager,
     [auth_backend],
 )
 
-# Подключение роутеров аутентификации
+
 app.include_router(
     fastapi_users.get_auth_router(auth_backend),
     prefix="/auth/jwt",
@@ -32,7 +32,7 @@ app.include_router(
     tags=["users"],
 )
 
-# Подключение основных роутеров приложения
+
 app.include_router(api_router)
 
 

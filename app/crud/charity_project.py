@@ -7,17 +7,22 @@ from app.schemas.charity_project import (CharityProjectCreate,
 
 
 class CharityProjectCRUD:
+    """Класс для работы с благотворительными проектами"""
+
     async def get_multi(self, session: AsyncSession):
+        """Получить все проекты"""
         result = await session.execute(select(CharityProject))
         return result.scalars().all()
 
     async def get_by_id(self, project_id: int, session: AsyncSession):
+        """Получить проект по ID"""
         result = await session.execute(
             select(CharityProject).where(CharityProject.id == project_id)
         )
         return result.scalars().first()
 
     async def get_by_name(self, name: str, session: AsyncSession):
+        """Получить проект по названию"""
         result = await session.execute(
             select(CharityProject).where(CharityProject.name == name)
         )
@@ -26,6 +31,7 @@ class CharityProjectCRUD:
     async def create(
         self, obj_in: CharityProjectCreate, session: AsyncSession
     ) -> CharityProject:
+        """Создать новый проект"""
         new_project = CharityProject(**obj_in.dict())
         session.add(new_project)
         await session.flush()
@@ -38,6 +44,7 @@ class CharityProjectCRUD:
         obj_in: CharityProjectUpdate,
         session: AsyncSession,
     ) -> CharityProject:
+        """Обновить существующий проект"""
         obj_data = obj_in.dict(exclude_unset=True)
 
         for field, value in obj_data.items():
@@ -49,6 +56,7 @@ class CharityProjectCRUD:
         return db_obj
 
     async def remove(self, db_obj: CharityProject, session: AsyncSession):
+        """Удалить проект"""
         await session.delete(db_obj)
         await session.flush()
         return db_obj

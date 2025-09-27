@@ -1,3 +1,4 @@
+import logging
 from typing import Optional, Union
 
 from fastapi import Depends, Request
@@ -13,8 +14,11 @@ from app.core.db import get_async_session
 from app.models.user import User
 from app.schemas.user import UserCreate
 
+logger = logging.getLogger(__name__)
+
 
 async def get_user_db(session: AsyncSession = Depends(get_async_session)):
+    """Получение базы данных пользователей"""
     yield SQLAlchemyUserDatabase(session, User)
 
 
@@ -22,7 +26,10 @@ bearer_transport = BearerTransport(tokenUrl="auth/jwt/login")
 
 
 def get_jwt_strategy() -> JWTStrategy:
-    return JWTStrategy(secret=settings.secret_key, lifetime_seconds=3600)
+    """Получение стратегии JWT"""
+    return JWTStrategy(
+        secret=settings.secret, lifetime_seconds=settings.minute
+    )
 
 
 auth_backend = AuthenticationBackend(
@@ -33,12 +40,15 @@ auth_backend = AuthenticationBackend(
 
 
 class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
+    """Менеджер пользователей с кастомной валидацией"""
+
     async def validate_password(
         self,
         password: str,
         user: Union[UserCreate, User],
     ) -> None:
-        if len(password) < 3:
+        """Валидация пароля пользователя"""
+        if len(password) < settings.password_len:
             raise InvalidPasswordException(
                 reason="Password should be at least 3 characters"
             )
@@ -50,10 +60,12 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
     async def on_after_register(
         self, user: User, request: Optional[Request] = None
     ):
-        print(f"Пользователь {user.email} зарегистрирован.")
+        """Действие после регистрации пользователя"""
+        logger.info("Пользователь %s зарегистрирован", user.email)
 
 
 async def get_user_manager(user_db=Depends(get_user_db)):
+    """Получение менеджера пользователей"""
     yield UserManager(user_db)
 
 
